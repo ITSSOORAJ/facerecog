@@ -24,9 +24,9 @@ paths:
 email_config:
     smtp_server: 'smtp.gmail.com'
     smtp_port: 587  # For TLS
-    sender: 'soooraj2003kerala@gmail.com'
-    password: 'frmycrmgioijdqut'
-    recipient: 'sooraj2003kerala@gmail.com'
+    sender: 'sender@gmail.com'
+    password: '#'
+    recipient: 'reciever@gmail.com'
 
 
 # Confidence threshold

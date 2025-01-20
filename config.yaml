@@ -6,7 +6,7 @@ camera:
 
 # Face detection settings
 face_detection:
-  scale_factor: 1.1
+  scale_factor: 1.3
   min_neighbors: 4
   min_size: [20, 20]
 

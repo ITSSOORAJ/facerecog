@@ -126,6 +126,9 @@ if __name__ == "__main__":
         face_cascade = cv2.CascadeClassifier(PATHS['cascade_file'])
         if face_cascade.empty():
             raise ValueError("Error loading cascade classifier")
+        profile_cascade=cv2.CascadeClassifier(PATHS["profile_cascade_file"])
+        if profile_cascade.empty():
+            raise ValueError("Error loading Profile cascade")
         
         # Initialize camera
         cam = initialize_camera(CAMERA['index'])
@@ -146,37 +149,39 @@ if __name__ == "__main__":
                 continue
             
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            faces = face_cascade.detectMultiScale(
+            faces_front = face_cascade.detectMultiScale(
                 gray,
                 scaleFactor=FACE_DETECTION['scale_factor'],
                 minNeighbors=FACE_DETECTION['min_neighbors'],
                 minSize=FACE_DETECTION['min_size']
             )
-            
-            for (x, y, w, h) in faces:
-                cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+# Detect side-profile faces
+            faces_side = profile_cascade.detectMultiScale(
+                gray,
+                scaleFactor=FACE_DETECTION['scale_factor'],
+                minNeighbors=FACE_DETECTION['min_neighbors'],
+                minSize=FACE_DETECTION['min_size']
+            )
+
+            for (x, y, w, h) in list(faces_front) + list(faces_side):
+    
                 
                 # Recognize the face
                 id, confidence = recognizer.predict(gray[y:y+h, x:x+w])
                 
                 # Check confidence and display result
-                if confidence <= CONFIDENCE_THRESHOLD:
-                    name = names.get(str(id), "Unknown")
-                    confidence_text = f"{confidence:.1f}%"
-                    
-                    # Send email notification
-                    #send_email(EMAIL_CONFIG['recipient'], name )  # Use actual recipient email
-                    
-                else:
-                    name = "Unknown"
-                    confidence_text = "N/A"
-                
-                # Display name and confidence
-                cv2.putText(img, name, (x+5, y-5), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-                cv2.putText(img, confidence_text, (x+5, y+h-5), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 1)
+                if confidence <= CONFIDENCE_THRESHOLD and str(id) in names:
+                    name = names[str(id)]
+                    confidence_text=f"{confidence:.1f}%"
             
+                    cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+                    cv2.putText(img, name, (x+5, y-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                    cv2.putText(img, confidence_text, (x+5, y+h-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 1)
+                    # Send email notification (optional)
+                    # send_email(EMAIL_CONFIG['recipient'], name)
+                else:
+                    logger.warning(f"Unknown face detected with confidence: {confidence:.1f}")
             cv2.imshow('Face Recognition', img)
             
             # Check for ESC key

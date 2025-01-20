@@ -1,24 +1,35 @@
-"""
-Configuration settings for the face recognition system
-"""
-import yaml
-import os
+# Camera settings
+camera:
+  index: 0  # Default camera (0 is usually built-in webcam)
+  width: 1280
+  height: 720   #640*480
 
-def load_config():
-    """Load configuration from YAML file"""
-    config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
-    with open(config_path, 'r') as f:
-        return yaml.safe_load(f)
+# Face detection settings
+face_detection:
+  scale_factor: 1.1
+  min_neighbors: 4
+  min_size: [20, 20]
 
-# Load configuration
-config = load_config()
+# Training settings
+training:
+  samples_needed: 50
 
-# Export configuration sections
-CAMERA = config['camera']
-FACE_DETECTION = config['face_detection']
-TRAINING = config['training']
-PATHS = config['paths']
-EMAIL_CONFIG=config['email_config']
+# File paths
+paths:
+  image_dir: "sooraj"
+  cascade_file: "haarcascade_frontalface_default.xml"
+  profile_cascade_file: "haarcascade_profileface.xml"
+  trainer_file: "trainer.yml"
+  names_file: "names.json"
+
+
+email_config:
+    smtp_server: 'smtp.gmail.com'
+    smtp_port: 587  # For TLS
+    sender: 'soooraj2003kerala@gmail.com'
+    password: 'frmycrmgioijdqut'
+    recipient: 'sooraj2003kerala@gmail.com'
+
 
 # Confidence threshold
-CONFIDENCE_THRESHOLD = config['confidence_threshold']
+confidence_threshold: 52

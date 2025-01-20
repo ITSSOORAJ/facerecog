@@ -28,25 +28,30 @@ def get_images_and_labels(path: str):
         faceSamples = []
         ids = []
 
-        # Create face detector
-        detector = cv2.CascadeClassifier(PATHS['cascade_file'])
-        if detector.empty():
-            raise ValueError("Error loading cascade classifier")
+        # Load frontal and profile face detectors
+        frontal_detector = cv2.CascadeClassifier(PATHS['cascade_file'])
+        profile_detector = cv2.CascadeClassifier(PATHS['profile_cascade_file'])
+
+        if frontal_detector.empty() or profile_detector.empty():
+            raise ValueError("Error loading cascade classifiers")
 
         for imagePath in imagePaths:
             # Convert image to grayscale
             PIL_img = Image.open(imagePath).convert('L')
             img_numpy = np.array(PIL_img, 'uint8')
-            
-            # Extract the user ID from the image file name
-            id = 1
 
-            # Detect faces in the grayscale image
-            faces = detector.detectMultiScale(img_numpy)
+            # Extract the user ID from the image file name
+            id = 1  # Assuming filename format "user.id.jpg"
+
+            # Detect frontal and profile faces
+            faces_frontal = frontal_detector.detectMultiScale(img_numpy, scaleFactor=1.3, minNeighbors=5, minSize=(30, 30))
+            faces_profile = profile_detector.detectMultiScale(img_numpy, scaleFactor=1.3, minNeighbors=5, minSize=(30, 30))
+
+            # Combine results and avoid duplicates
+            faces = list(faces_frontal) + list(faces_profile)
 
             for (x, y, w, h) in faces:
-                # Extract face region and append to the samples
-                faceSamples.append(img_numpy[y:y+h, x:x+w])
+                faceSamples.append(img_numpy[y:y + h, x:x + w])
                 ids.append(id)
 
         return faceSamples, ids
